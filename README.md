@@ -1,2 +1,3 @@
-# angular-d3-chronograph
-D3.js in an Angular module
+## D3.js in an Angular module
+
+##### Live version: [http://www.matthewbullen.net/angular-d3-chronograph/index.html](http://www.matthewbullen.net/angular-d3-chronograph/index.html)
