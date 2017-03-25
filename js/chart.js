@@ -19,18 +19,18 @@ d3.custom = {
 
 				/* BASE DATA */
 				var monthData = [
-					{ "month": "Jan", 	"days": 31, "order": 1 },
-					{ "month": "Feb", 	"days": 28, "order": 2 },
-					{ "month": "Mar", 	"days": 31, "order": 3 },
-					{ "month": "Apr", 	"days": 30, "order": 4 },
-					{ "month": "May", 	"days": 31, "order": 5 },
-					{ "month": "June", 	"days": 30, "order": 6 },
-					{ "month": "July", 	"days": 31, "order": 7 },
-					{ "month": "Aug", 	"days": 31, "order": 8 },
-					{ "month": "Sept",      "days": 30, "order": 9 },
-					{ "month": "Oct", 	"days": 31, "order": 10 },
-					{ "month": "Nov", 	"days": 30, "order": 11 },
-					{ "month": "Dec", 	"days": 31, "order": 12 },
+					{ "month": "Jan", "days": 31, "order": 1 },
+					{ "month": "Feb", "days": 28, "order": 2 },
+					{ "month": "Mar", "days": 31, "order": 3 },
+					{ "month": "Apr", "days": 30, "order": 4 },
+					{ "month": "May", "days": 31, "order": 5 },
+					{ "month": "June", "days": 30, "order": 6 },
+					{ "month": "July", "days": 31, "order": 7 },
+					{ "month": "Aug", "days": 31, "order": 8 },
+					{ "month": "Sept", "days": 30, "order": 9 },
+					{ "month": "Oct", "days": 31, "order": 10 },
+					{ "month": "Nov", "days": 30, "order": 11 },
+					{ "month": "Dec", "days": 31, "order": 12 },
 				];
 				
 				var dayData = populateDayData(31);
