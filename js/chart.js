@@ -27,7 +27,7 @@ d3.custom = {
 					{ "month": "June", 	"days": 30, "order": 6 },
 					{ "month": "July", 	"days": 31, "order": 7 },
 					{ "month": "Aug", 	"days": 31, "order": 8 },
-					{ "month": "Sept",  "days": 30, "order": 9 },
+					{ "month": "Sept",      "days": 30, "order": 9 },
 					{ "month": "Oct", 	"days": 31, "order": 10 },
 					{ "month": "Nov", 	"days": 30, "order": 11 },
 					{ "month": "Dec", 	"days": 31, "order": 12 },
@@ -109,7 +109,7 @@ d3.custom = {
 				addDays();
 
 				/* SLIDER DATA CAPTURE */
-			    // http://datavizclub.tumblr.com/post/119852708658/collision-detection-with-svgs-bounding-box
+			        // http://datavizclub.tumblr.com/post/119852708658/collision-detection-with-svgs-bounding-box
 				function collisionDetection() {
 					var node, nodeBox, nodeLeft, nodeRight, nodeTop, nodeBottom, otherBox, otherLeft, otherRight, otherTop, otherBottom, collideHoriz, collideVert, nodeData;
 					node = this.node();
