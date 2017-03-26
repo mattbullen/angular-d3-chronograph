@@ -13,7 +13,10 @@ d3.custom = {
 					height = 750, 
 					outerRadius = 300, 
 					innerRadius = 190,
-					baseDayBoxWidth = 38.25,
+					monthTickBufferOuter = 85,
+					monthTickBufferInner = 65,
+					dayTickBufferOuter = 55,
+					dayTickBufferInner = 45,
 					textContainerWidth = 238,
 					fillDefault = "#000",
 					fillHighlight = "#3535d2",
@@ -76,8 +79,8 @@ d3.custom = {
 					.attr("id", function(d, i) { return "month-" + monthData[i].month; })
 					.attr("class", "month-tick")
 					.attr("transform", function(d) {
-						d.outerRadius = outerRadius + 75;
-						d.innerRadius = outerRadius + 55;
+						d.outerRadius = outerRadius + monthTickBufferOuter;
+						d.innerRadius = outerRadius + monthTickBufferInner;
 						return "translate(" + monthArcFunction.centroid(d) + ")";
 					})
 					.attr("text-anchor", "middle")
@@ -118,7 +121,7 @@ d3.custom = {
 						.on("dragend", dispatch.customMovement)
 					);
 				
-				/* DAY SLIDER */				
+				/* RENDER THE DAY SLIDER */				
 				addDays();
 
 				/* MONTH & DAY TICK HIGHLIGHT EFFECT */
@@ -138,11 +141,12 @@ d3.custom = {
 				}
 				
 				/* SLIDER DATA CAPTURE */
-			    // http://datavizclub.tumblr.com/post/119852708658/collision-detection-with-svgs-bounding-box
+				// This was a little tricky. The best solution so far is to find the slider handle's position
+				// on its circular slider track, instead of relying on the base SVG element positioning.
+			    // 		http://datavizclub.tumblr.com/post/119852708658/collision-detection-with-svgs-bounding-box
+				// 		https://stackoverflow.com/questions/34293488/d3-find-the-angle-of-line
 				function collisionDetection() {
-					var node, nodeBox, nodeLeft, nodeRight, nodeTop, nodeBottom, otherBox, 
-						otherLeft, otherRight, otherTop, otherBottom, horizontalCollision, 
-						verticalCollision, nodeData, boxAdjustment;
+					var node, nodeData, d_from_origin, alpha, xVal, yVal, angle, referenceAngles;
 					node = this.node();
 					nodeBox = node.getBBox();
 					nodeLeft = nodeBox.x;
@@ -156,14 +160,14 @@ d3.custom = {
 							.attr("selected", function(d) {
 								removeTickHighlight("#month-" + d.data.month, fontSizeBase);
 								if (this !== node) {
-									otherBox = this.getBBox();
-									otherLeft = otherBox.x;
-									otherRight = otherBox.x + otherBox.width;
-									otherTop = otherBox.y;
-									otherBottom = otherBox.y + otherBox.height;
-									horizontalCollision = nodeLeft < otherRight && nodeRight > otherLeft;
-									verticalCollision = nodeTop < otherBottom && nodeBottom > otherTop;
-									if (horizontalCollision && verticalCollision) {
+									d_from_origin = Math.sqrt(Math.pow(d3.event.x, 2) + Math.pow(d3.event.y, 2));
+									alpha = Math.acos(d3.event.x / d_from_origin);
+									xVal = d3.event.y < 0 ? -innerRadius * Math.sin(alpha) : innerRadius * Math.sin(alpha);
+									yVal = innerRadius * Math.cos(alpha);
+									angle = Math.atan2(yVal, 0 - xVal);
+									if (nodeBox.x <= 0) { angle = (Math.PI * 2) + angle; }
+									referenceAngles = d3.select(this).data()[0];
+									if (angle > referenceAngles.startAngle && angle < referenceAngles.endAngle) {	
 										nodeData = d3.select(node).data();
 										if (d.data.month) {
 											nodeData[0].month = d.data.month;
@@ -183,27 +187,26 @@ d3.custom = {
 								}
 							});
 					} else {
+						removeTickHighlight(".day-tick", fontSizeSmall);
 						d3.selectAll(".day-slice")
 							.attr("selected", "false")
 							.attr("selected", function(d, i) {
+								removeTickHighlight("#day-" + d.data.day, fontSizeSmall);
 								if (this !== node) {
 									otherBox = this.getBBox();
-									if (i < 4) {
-										boxAdjustment = baseDayBoxWidth * i;
-									} else {
-										boxAdjustment = 0;
-									}
-									otherLeft = otherBox.x + boxAdjustment;
-									otherRight = otherBox.x + otherBox.width;
-									otherTop = otherBox.y;
-									otherBottom = otherBox.y + otherBox.height;
-									horizontalCollision = nodeLeft < otherRight && nodeRight > otherLeft;
-									verticalCollision = nodeTop < otherBottom && nodeBottom > otherTop;
-									if (horizontalCollision && verticalCollision) {
+									d_from_origin = Math.sqrt(Math.pow(d3.event.x, 2) + Math.pow(d3.event.y, 2));
+									alpha = Math.acos(d3.event.x / d_from_origin);
+									xVal = d3.event.y < 0 ? -innerRadius * Math.sin(alpha) : innerRadius * Math.sin(alpha);
+									yVal = innerRadius * Math.cos(alpha);
+									angle = Math.atan2(yVal, 0 - xVal);
+									if (nodeBox.x <= 0) { angle = (Math.PI * 2) + angle; }
+									referenceAngles = d3.select(this).data()[0];
+									if (angle > referenceAngles.startAngle && angle < referenceAngles.endAngle) {
 										nodeData = d3.select(node).data();
 										if (d.data.day) {
 											nodeData[0].day = d.data.day;
 										}
+										highlightTick("#day-" + d.data.day, fontSizeBase);
 										return "true";
 									} else {
 										return "false";
@@ -239,6 +242,7 @@ d3.custom = {
 						.attr("id", function(d, i) { return "day-slice-" + dayData[i].day; })
 						.attr("class", "day-slice");
 					d3.select("#day-slice-1").attr("selected", "true");
+					highlightTick("#day-1", fontSizeBase);
 					
 					var dayArcFunction = d3.svg.arc().outerRadius(innerRadius);
 					dayArcs.append("svg:path").attr("d", dayArcFunction); 
@@ -248,8 +252,8 @@ d3.custom = {
 						.attr("id", function(d, i) { return "day-" + dayData[i].day; })
 						.attr("class", "day-tick")
 						.attr("transform", function(d) {
-							d.outerRadius = innerRadius + 30
-							d.innerRadius = innerRadius + 35;
+							d.outerRadius = innerRadius + dayTickBufferOuter;
+							d.innerRadius = innerRadius + dayTickBufferInner;
 							return "translate(" + dayArcFunction.centroid(d) + ")";
 						})
 						.attr("text-anchor", "middle")
