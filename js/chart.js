@@ -242,7 +242,6 @@ d3.custom = {
 						.attr("id", function(d, i) { return "day-slice-" + dayData[i].day; })
 						.attr("class", "day-slice");
 					d3.select("#day-slice-1").attr("selected", "true");
-					highlightTick("#day-1", fontSizeBase);
 					
 					var dayArcFunction = d3.svg.arc().outerRadius(innerRadius);
 					dayArcs.append("svg:path").attr("d", dayArcFunction); 
@@ -260,6 +259,7 @@ d3.custom = {
 						.style("fill", fillDefault)
 						.style("font", fontSizeSmall + " " + fontDefault)
 						.text(function(d, i) { return dayData[i].day; });
+					highlightTick("#day-1", fontSizeBase);
 					
 					d3.select("#day-circle").remove();
 					var innerCircle = dayContainer.append("svg:circle")
