@@ -1,7 +1,7 @@
 body {
 	margin: 0;
 	padding: 0;
-    font-family: "Open Sans", Arial, sans-serif;
+    	font-family: "Open Sans", Arial, sans-serif;
 	color: #000;
 }
 
@@ -18,19 +18,19 @@ body {
 }
 
 .circumference {
-    fill: #fff;
-    stroke: #d8e5f6;
-    stroke-width: 4px;
+   	fill: #fff;
+    	stroke: #d8e5f6;
+    	stroke-width: 4px;
 }
 
 .dot circle:hover {
-    cursor: pointer;
+    	cursor: pointer;
 }
 
 .dot circle {
-    fill: #3535d2;
-    stroke: #191970;
-    stroke-width: 2px;
+    	fill: #3535d2;
+   	stroke: #191970;
+    	stroke-width: 2px;
 	z-index: 1000;
 }
 
