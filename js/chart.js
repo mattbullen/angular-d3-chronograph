@@ -12,25 +12,30 @@ d3.custom = {
 				var width = 750, 
 					height = 750, 
 					outerRadius = 300, 
-					innerRadius = 180, 
-					fillDefault = "#000", 
-					fontDefault = "'Open Sans', Arial, sans-serif",
-					textContainerWidth = 238;
+					innerRadius = 190,
+					baseDayBoxWidth = 38.25,
+					textContainerWidth = 238,
+					fillDefault = "#000",
+					fillHighlight = "#3535d2",
+					fontSizeSmall = "12px",
+					fontSizeBase = "14px",
+					fontSizeLarge = "18px",
+					fontDefault = "'Open Sans', Arial, sans-serif";
 
 				/* BASE DATA */
 				var monthData = [
-					{ "month": "Jan", "days": 31, "order": 1 },
-					{ "month": "Feb", "days": 28, "order": 2 },
-					{ "month": "Mar", "days": 31, "order": 3 },
-					{ "month": "Apr", "days": 30, "order": 4 },
-					{ "month": "May", "days": 31, "order": 5 },
-					{ "month": "June", "days": 30, "order": 6 },
-					{ "month": "July", "days": 31, "order": 7 },
-					{ "month": "Aug", "days": 31, "order": 8 },
-					{ "month": "Sept", "days": 30, "order": 9 },
-					{ "month": "Oct", "days": 31, "order": 10 },
-					{ "month": "Nov", "days": 30, "order": 11 },
-					{ "month": "Dec", "days": 31, "order": 12 },
+					{ "month": "Jan", 	"days": 31, "order": 1 },
+					{ "month": "Feb", 	"days": 28, "order": 2 },
+					{ "month": "Mar", 	"days": 31, "order": 3 },
+					{ "month": "Apr", 	"days": 30, "order": 4 },
+					{ "month": "May", 	"days": 31, "order": 5 },
+					{ "month": "June", 	"days": 30, "order": 6 },
+					{ "month": "July", 	"days": 31, "order": 7 },
+					{ "month": "Aug", 	"days": 31, "order": 8 },
+					{ "month": "Sept",  "days": 30, "order": 9 },
+					{ "month": "Oct", 	"days": 31, "order": 10 },
+					{ "month": "Nov", 	"days": 30, "order": 11 },
+					{ "month": "Dec", 	"days": 31, "order": 12 },
 				];
 				
 				var dayData = populateDayData(31);
@@ -45,7 +50,11 @@ d3.custom = {
 					.style("margin-left", (window.innerWidth - width) / 2 + "px")
 					.append("svg:g")
 					.attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
-
+					
+				window.addEventListener("resize", function() {
+					d3.select("#root").style("margin-left", (window.innerWidth - width) / 2 + "px");
+				});
+					
 				/* MONTH SLIDER */
 				var monthContainer = svg.append("g").attr("id", "monthContainer");
 				
@@ -57,21 +66,25 @@ d3.custom = {
 					.data(monthLayout)
 					.enter()
 					.append("svg:g")
+					.attr("id", function(d, i) { return "month-slice-" + monthData[i].month; })
 					.attr("class", "month-slice");
-					
+				
 				var monthArcFunction = d3.svg.arc().outerRadius(outerRadius);
 				monthArcs.append("svg:path").attr("d", monthArcFunction);
 					
 				monthArcs.append("svg:text")
+					.attr("id", function(d, i) { return "month-" + monthData[i].month; })
+					.attr("class", "month-tick")
 					.attr("transform", function(d) {
-						d.outerRadius = outerRadius + 70;
-						d.innerRadius = outerRadius + 50;
+						d.outerRadius = outerRadius + 75;
+						d.innerRadius = outerRadius + 55;
 						return "translate(" + monthArcFunction.centroid(d) + ")";
 					})
 					.attr("text-anchor", "middle")
 					.style("fill", fillDefault)
-					.style("font", "14px " + fontDefault)
-					.text(function(d, i) { return monthData[i].month; }); 
+					.style("font", fontSizeBase + " " + fontDefault)
+					.text(function(d, i) { return monthData[i].month; });
+				highlightTick("#month-Jan", fontSizeLarge);
 				
 				var outerCircle = monthContainer.append("svg:circle")
 					.attr("r", outerRadius)
@@ -108,10 +121,28 @@ d3.custom = {
 				/* DAY SLIDER */				
 				addDays();
 
+				/* MONTH & DAY TICK HIGHLIGHT EFFECT */
+				function highlightTick(selector, fontSize) {
+					d3.select(selector)		
+						.style("fill", fillHighlight)
+						.style("font-size", fontSize)
+						.style("font-weight", "bold");
+				}
+				
+				function removeTickHighlight(selector, fontSize) {
+					d3.selectAll(selector)
+						.attr("selected", "false")
+						.style("fill", fillDefault)
+						.style("font-size", fontSize)
+						.style("font-weight", "normal");
+				}
+				
 				/* SLIDER DATA CAPTURE */
-			        // http://datavizclub.tumblr.com/post/119852708658/collision-detection-with-svgs-bounding-box
+			    // http://datavizclub.tumblr.com/post/119852708658/collision-detection-with-svgs-bounding-box
 				function collisionDetection() {
-					var node, nodeBox, nodeLeft, nodeRight, nodeTop, nodeBottom, otherBox, otherLeft, otherRight, otherTop, otherBottom, collideHoriz, collideVert, nodeData;
+					var node, nodeBox, nodeLeft, nodeRight, nodeTop, nodeBottom, otherBox, 
+						otherLeft, otherRight, otherTop, otherBottom, horizontalCollision, 
+						verticalCollision, nodeData, boxAdjustment;
 					node = this.node();
 					nodeBox = node.getBBox();
 					nodeLeft = nodeBox.x;
@@ -119,18 +150,20 @@ d3.custom = {
 					nodeTop = nodeBox.y;
 					nodeBottom = nodeBox.y + nodeBox.height;
 					if (d3.select(node).attr("id") === "month-handle-circle") {
+						removeTickHighlight(".month-tick", fontSizeBase);
 						d3.selectAll(".month-slice")
 							.attr("selected", "false")
 							.attr("selected", function(d) {
+								removeTickHighlight("#month-" + d.data.month, fontSizeBase);
 								if (this !== node) {
 									otherBox = this.getBBox();
 									otherLeft = otherBox.x;
 									otherRight = otherBox.x + otherBox.width;
 									otherTop = otherBox.y;
 									otherBottom = otherBox.y + otherBox.height;
-									collideHoriz = nodeLeft < otherRight && nodeRight > otherLeft;
-									collideVert = nodeTop < otherBottom && nodeBottom > otherTop;
-									if (collideHoriz && collideVert) {
+									horizontalCollision = nodeLeft < otherRight && nodeRight > otherLeft;
+									verticalCollision = nodeTop < otherBottom && nodeBottom > otherTop;
+									if (horizontalCollision && verticalCollision) {
 										nodeData = d3.select(node).data();
 										if (d.data.month) {
 											nodeData[0].month = d.data.month;
@@ -140,6 +173,7 @@ d3.custom = {
 											addDays();
 											nodeData[0].day = 1;
 										}
+										highlightTick("#month-" + d.data.month, fontSizeLarge);
 										return "true";
 									} else {
 										return "false";
@@ -151,16 +185,21 @@ d3.custom = {
 					} else {
 						d3.selectAll(".day-slice")
 							.attr("selected", "false")
-							.attr("selected", function(d) {
-									if (this !== node) {
+							.attr("selected", function(d, i) {
+								if (this !== node) {
 									otherBox = this.getBBox();
-									otherLeft = otherBox.x;
+									if (i < 4) {
+										boxAdjustment = baseDayBoxWidth * i;
+									} else {
+										boxAdjustment = 0;
+									}
+									otherLeft = otherBox.x + boxAdjustment;
 									otherRight = otherBox.x + otherBox.width;
 									otherTop = otherBox.y;
 									otherBottom = otherBox.y + otherBox.height;
-									collideHoriz = nodeLeft < otherRight && nodeRight > otherLeft;
-									collideVert = nodeTop < otherBottom && nodeBottom > otherTop;
-									if (collideHoriz && collideVert) {
+									horizontalCollision = nodeLeft < otherRight && nodeRight > otherLeft;
+									verticalCollision = nodeTop < otherBottom && nodeBottom > otherTop;
+									if (horizontalCollision && verticalCollision) {
 										nodeData = d3.select(node).data();
 										if (d.data.day) {
 											nodeData[0].day = d.data.day;
@@ -197,13 +236,16 @@ d3.custom = {
 						.data(dayLayout)
 						.enter()
 						.append("svg:g")
+						.attr("id", function(d, i) { return "day-slice-" + dayData[i].day; })
 						.attr("class", "day-slice");
-						
+					d3.select("#day-slice-1").attr("selected", "true");
+					
 					var dayArcFunction = d3.svg.arc().outerRadius(innerRadius);
 					dayArcs.append("svg:path").attr("d", dayArcFunction); 
 					
 					d3.selectAll(".day-tick").remove();
 					dayArcs.append("svg:text")
+						.attr("id", function(d, i) { return "day-" + dayData[i].day; })
 						.attr("class", "day-tick")
 						.attr("transform", function(d) {
 							d.outerRadius = innerRadius + 30
@@ -212,8 +254,8 @@ d3.custom = {
 						})
 						.attr("text-anchor", "middle")
 						.style("fill", fillDefault)
-						.style("font", "12px " + fontDefault)
-						.text(function(d, i) { return dayData[i].day; }); 
+						.style("font", fontSizeSmall + " " + fontDefault)
+						.text(function(d, i) { return dayData[i].day; });
 					
 					d3.select("#day-circle").remove();
 					var innerCircle = dayContainer.append("svg:circle")
@@ -255,6 +297,10 @@ d3.custom = {
 				var textContainer = d3.select("#textContainer")
 					.style("left", (window.innerWidth - textContainerWidth) / 2 + "px");
 				
+				window.addEventListener("resize", function() {
+					d3.select("#textContainer").style("left", (window.innerWidth - textContainerWidth) / 2 + "px");
+				});
+				
 				textContainer.append("div")
 					.attr("id", "text-hour")
 					.data([{
@@ -285,7 +331,8 @@ d3.custom = {
 							windowObject.on("mousemove", null).on("mouseup", null); 
 						}
 					})
-					.on("mousemove", dispatch.customMovement);
+					.on("mousemove", dispatch.customMovement)
+					.on("mouseleave", dispatch.customMovement);
 					
 				textContainer.append("div")
 					.attr("class", "text")
@@ -321,7 +368,8 @@ d3.custom = {
 							windowObject.on("mousemove", null).on("mouseup", null); 
 						}
 					})
-					.on("mousemove", dispatch.customMovement);
+					.on("mousemove", dispatch.customMovement)
+					.on("mouseleave", dispatch.customMovement);
 					
 				textContainer.append("div")
 					.attr("id", "text-ampm")
@@ -350,7 +398,8 @@ d3.custom = {
 							windowObject.on("mousemove", null).on("mouseup", null); 
 						}
 					})
-					.on("mousemove", dispatch.customMovement);
+					.on("mousemove", dispatch.customMovement)
+					.on("mouseleave", dispatch.customMovement);
 			});
 		}
 		d3.rebind(exports, dispatch, "on");
