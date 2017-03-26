@@ -143,7 +143,7 @@ d3.custom = {
 				/* SLIDER DATA CAPTURE */
 				// This was a little tricky. The best solution so far is to find the slider handle's position
 				// on its circular slider track, instead of relying on the base SVG element positioning.
-			    // 		http://datavizclub.tumblr.com/post/119852708658/collision-detection-with-svgs-bounding-box
+			        // 		http://datavizclub.tumblr.com/post/119852708658/collision-detection-with-svgs-bounding-box
 				// 		https://stackoverflow.com/questions/34293488/d3-find-the-angle-of-line
 				function collisionDetection() {
 					var node, nodeData, d_from_origin, alpha, xVal, yVal, angle, referenceAngles;
